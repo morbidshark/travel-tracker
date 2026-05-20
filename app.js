@@ -6,7 +6,7 @@
      from https://cloud.maptiler.com/account/keys/
    ═══════════════════════════════════════════════════ */
 
-const MAPTILER_KEY = 'YOUR_MAPTILER_API_KEY';
+const MAPTILER_KEY = 'yYbSpsg6ftQmHVxtJKwk';
 
 // ─── Storage ──────────────────────────────────────────
 const STORAGE_KEY = 'atlas_countries_v2';
