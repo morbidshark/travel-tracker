@@ -6,7 +6,7 @@
      from https://cloud.maptiler.com/account/keys/
    ═══════════════════════════════════════════════════ */
 
-const MAPTILER_KEY = 'yYbSpsg6ftQmHVxtJKwk';
+const MAPTILER_KEY = 'YOUR_MAPTILER_API_KEY';
 
 // ─── Storage ──────────────────────────────────────────
 const STORAGE_KEY = 'atlas_countries_v2';
@@ -32,11 +32,13 @@ const map = new maptilersdk.Map({
   style: maptilersdk.MapStyle.DATAVIZ.LIGHT,
   center: [10, 20],
   zoom: 1.8,
-  minZoom: 1,
+  minZoom: 1.5,
   maxZoom: 8,
   pitchWithRotate: false,
   dragRotate: false,
   touchPitch: false,
+  renderWorldCopies: false,   // prevents continent duplication
+  terrain: null,              // ensure no 3D terrain
 });
 
 // ─── Country name lookup (ISO 3166-1 alpha-2 → name) ──
@@ -99,30 +101,67 @@ const VISITED_COLOR  = '#2dd4a0';
 const WISHLIST_COLOR = '#f5a623';
 
 // ─── Build filter expressions ─────────────────────────
-// MapTiler Countries tileset: iso_a2 property, level=0 for countries
 function makeFilter(status) {
+  const { ISO_FIELD, LEVEL_FIELD } = window._atlasFields || { ISO_FIELD: 'iso_a2', LEVEL_FIELD: 'level' };
   const codes = Object.entries(countryData)
     .filter(([, v]) => v === status)
     .map(([k]) => k);
-  if (codes.length === 0) return ['==', ['get', 'iso_a2'], '___none___'];
-  return [
-    'all',
-    ['==', ['get', 'level'], 0],
-    ['in', ['get', 'iso_a2'], ['literal', codes]],
-  ];
+  if (codes.length === 0) return ['==', ['get', ISO_FIELD], '___none___'];
+  const isoFilter = ['in', ['get', ISO_FIELD], ['literal', codes]];
+  if (!LEVEL_FIELD) return isoFilter;
+  return ['all', ['==', ['get', LEVEL_FIELD], 0], isoFilter];
 }
 
 function noneFilter() {
-  return ['==', ['get', 'iso_a2'], '___none___'];
+  const { ISO_FIELD } = window._atlasFields || { ISO_FIELD: 'iso_a2' };
+  return ['==', ['get', ISO_FIELD], '___none___'];
 }
 
 // ─── Map ready ────────────────────────────────────────
 map.on('load', () => {
-  // MapTiler Countries is a separate tileset used via the Dataviz style.
-  // The source is 'maptiler_planet' and the country polygons are in
-  // source-layer 'countries' with property 'iso_a2' and 'level' (0 = country).
-  const SRC   = 'maptiler_planet';
-  const LAYER = 'countries';
+  // Remove any hill-shading / terrain layers for a flat look
+  map.getStyle().layers.forEach(l => {
+    if (l.type === 'hillshade' || l.id.includes('hillshade') || l.id.includes('terrain')) {
+      try { map.removeLayer(l.id); } catch {}
+    }
+  });
+
+  // Auto-detect the correct source + source-layer for country polygons.
+  // We look for a fill layer whose source-layer contains country-level features
+  // with an iso_a2 property — works across MapTiler style versions.
+  let SRC   = 'maptiler_planet';
+  let LAYER = 'countries';
+
+  const styleLayers = map.getStyle().layers;
+  const candidate = styleLayers.find(l =>
+    l.type === 'fill' &&
+    l['source-layer'] &&
+    (l['source-layer'].includes('countr') || l['source-layer'].includes('land'))
+  );
+  if (candidate) {
+    SRC   = candidate.source   || SRC;
+    LAYER = candidate['source-layer'] || LAYER;
+  }
+  console.log(`Atlas: using source="${SRC}" layer="${LAYER}"`);
+
+  // Probe actual feature properties so we use the right field names
+  // (MapTiler uses iso_a2 but fall back to iso2 or ADM0_A3 if needed)
+  let ISO_FIELD  = 'iso_a2';
+  let LEVEL_FIELD = 'level';
+
+  const probe = map.querySourceFeatures(SRC, { sourceLayer: LAYER });
+  if (probe.length > 0) {
+    const props = probe[0].properties;
+    console.log('Atlas: sample feature props:', props);
+    if ('iso_a2'  in props) ISO_FIELD = 'iso_a2';
+    else if ('ISO_A2' in props) ISO_FIELD = 'ISO_A2';
+    else if ('iso2'   in props) ISO_FIELD = 'iso2';
+    if (!('level' in props)) LEVEL_FIELD = null;
+  }
+
+  // Rebuild filters using detected field names
+  window._atlasFields = { ISO_FIELD, LEVEL_FIELD };
+
 
   // Visited fill
   map.addLayer({
@@ -209,9 +248,14 @@ function refreshLayers() {
 let hoveredIso = null;
 
 function getCountryFromPoint(point) {
+  const { ISO_FIELD, LEVEL_FIELD } = window._atlasFields || { ISO_FIELD: 'iso_a2', LEVEL_FIELD: 'level' };
   const features = map.queryRenderedFeatures(point);
-  const f = features.find(f => f.properties?.iso_a2 && f.properties?.level === 0);
-  return f?.properties?.iso_a2 || null;
+  const f = features.find(f => {
+    if (!f.properties?.[ISO_FIELD]) return false;
+    if (LEVEL_FIELD != null && f.properties[LEVEL_FIELD] !== 0) return false;
+    return true;
+  });
+  return f?.properties?.[ISO_FIELD] || null;
 }
 
 function setupInteraction() {
@@ -220,8 +264,11 @@ function setupInteraction() {
     const iso = getCountryFromPoint(e.point);
     if (iso !== hoveredIso) {
       hoveredIso = iso;
+      const { ISO_FIELD, LEVEL_FIELD } = window._atlasFields || { ISO_FIELD: 'iso_a2', LEVEL_FIELD: 'level' };
       map.setFilter('atlas-hover', iso
-        ? ['all', ['==', ['get', 'level'], 0], ['==', ['get', 'iso_a2'], iso]]
+        ? (LEVEL_FIELD
+            ? ['all', ['==', ['get', LEVEL_FIELD], 0], ['==', ['get', ISO_FIELD], iso]]
+            : ['==', ['get', ISO_FIELD], iso])
         : noneFilter()
       );
       map.getCanvas().style.cursor = iso ? 'pointer' : '';
