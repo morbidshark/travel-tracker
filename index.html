@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Atlas — My Travel Map</title>
 
-  <!-- Leaflet -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <!-- MapTiler SDK -->
+  <link rel="stylesheet" href="https://cdn.maptiler.com/maptiler-sdk-js/v2.4.0/maptiler-sdk.css" />
+  <script src="https://cdn.maptiler.com/maptiler-sdk-js/v2.4.0/maptiler-sdk.umd.js"></script>
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -64,6 +64,18 @@
           <span class="menu-btn-icon">✕</span>
           <span>Clear</span>
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- API key missing warning -->
+  <div id="api-warning" class="hidden">
+    <div id="api-warning-box">
+      <div style="font-size:32px;margin-bottom:12px">🗝️</div>
+      <div style="font-family:'Playfair Display',serif;font-size:20px;margin-bottom:10px">API Key Required</div>
+      <div style="color:var(--text-muted);font-size:14px;line-height:1.6;margin-bottom:16px">
+        Open <code>app.js</code> and replace <code>YOUR_MAPTILER_API_KEY</code> with your key from
+        <a href="https://maptiler.com" target="_blank" style="color:var(--accent)">maptiler.com</a>
       </div>
     </div>
   </div>
