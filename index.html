@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Atlas — My Travel Map</title>
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Map -->
+  <div id="map"></div>
+
+  <!-- Stats bar -->
+  <div id="stats-bar">
+    <div class="stat">
+      <span class="stat-num" id="stat-visited">0</span>
+      <span class="stat-label">visited</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat">
+      <span class="stat-num" id="stat-wishlist">0</span>
+      <span class="stat-label">want to visit</span>
+    </div>
+  </div>
+
+  <!-- Search bar -->
+  <div id="search-container">
+    <div id="search-box">
+      <svg id="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input type="text" id="search-input" placeholder="Search countries…" autocomplete="off" autocorrect="off" spellcheck="false" />
+      <button id="search-clear" aria-label="Clear search">✕</button>
+    </div>
+    <div id="search-results"></div>
+  </div>
+
+  <!-- Country action menu -->
+  <div id="menu-overlay" class="hidden">
+    <div id="menu-sheet">
+      <div id="menu-handle"></div>
+      <div id="menu-country-name"></div>
+      <div id="menu-buttons">
+        <button class="menu-btn visited-btn" data-action="visited">
+          <span class="menu-btn-icon">✈️</span>
+          <span>Visited</span>
+        </button>
+        <button class="menu-btn wishlist-btn" data-action="wishlist">
+          <span class="menu-btn-icon">⭐</span>
+          <span>Want to Visit</span>
+        </button>
+        <button class="menu-btn clear-btn" data-action="clear">
+          <span class="menu-btn-icon">✕</span>
+          <span>Clear</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
