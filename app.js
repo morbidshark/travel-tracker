@@ -7,7 +7,7 @@ const STORAGE_KEY = 'atlas_countries';
 
 function loadData() {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+    const MAPTILER_KEY = 'yYbSpsg6ftQmHVxtJKwk';
   } catch { return {}; }
 }
 
