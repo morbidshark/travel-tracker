@@ -6,7 +6,7 @@
      from https://cloud.maptiler.com/account/keys/
    ═══════════════════════════════════════════════════ */
 
-const MAPTILER_KEY = 'YOUR_MAPTILER_API_KEY';
+const MAPTILER_KEY = 'yYbSpsg6ftQmHVxtJKwk';
 
 // ─── Storage ──────────────────────────────────────────
 const STORAGE_KEY = 'atlas_countries_v2';
@@ -20,7 +20,7 @@ function saveData(d) { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
 let countryData = loadData(); // { "NL": "visited" | "wishlist" }
 
 // ─── Validate key ─────────────────────────────────────
-if (MAPTILER_KEY === 'YOUR_MAPTILER_API_KEY') {
+if (MAPTILER_KEY === 'yYbSpsg6ftQmHVxtJKwk') {
   document.getElementById('api-warning').classList.remove('hidden');
 }
 
