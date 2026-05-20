@@ -20,7 +20,7 @@ function saveData(d) { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
 let countryData = loadData(); // { "NL": "visited" | "wishlist" }
 
 // ─── Validate key ─────────────────────────────────────
-if (MAPTILER_KEY === 'yYbSpsg6ftQmHVxtJKwk') {
+if (MAPTILER_KEY === 'YOUR_MAPTILER_API_KEY') {
   document.getElementById('api-warning').classList.remove('hidden');
 }
 
